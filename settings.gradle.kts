@@ -1,0 +1,1 @@
+rootProject.name = "FaarizS-Java3-L1-Hangman"

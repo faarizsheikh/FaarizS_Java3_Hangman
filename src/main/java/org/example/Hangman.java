@@ -92,24 +92,20 @@ public class Hangman {
             // MAIN LOOP:
             while (wrongGuesses < MAX_WRONG_GUESSES) {
                 System.out.print("Word: ");
-                for (char c : wordState) {
-                    System.out.print(c + " "); // Prints each blank or char without spaces.
-                }
+                for (char c : wordState) { System.out.print(c + " "); } // Prints each blank or char without spaces.
                 System.out.println();
 
                 if (!guessedLetters.isEmpty()) {
                     System.out.print("Guessed letters: ");
                     List<Character> sorted = new ArrayList<>(guessedLetters);
                     Collections.sort(sorted);
-                    for (char c : sorted) {
-                        System.out.print(c + " "); // Displays guessed letters.
-                    }
+                    for (char c : sorted) { System.out.print(c + " "); } // Displays guessed letters.
                     System.out.println();
                 }
 
                 // GET: Input
                 System.out.print("Guess a letter: ");
-                char guess = scanner.next().trim().toLowerCase().charAt(0); // Takes first character, convert to lowercase.
+                char guess = scanner.next().trim().toLowerCase().charAt(0); // Takes 1st char, convert -> lowercase.
 
                 if (!Character.isLetter(guess)) { // Validates input and only allow letters of the English alphabet.
                     System.out.println("(Please enter a letter A-Z only!)\n");
@@ -127,9 +123,7 @@ public class Hangman {
                     System.out.println("(Correct guess!)\n");
 
                     for (int i = 0; i < word.length(); i++) {
-                        if (word.charAt(i) == guess) {
-                            wordState.set(i, guess); // Replaces "_" with correct letter.
-                        }
+                        if (word.charAt(i) == guess) { wordState.set(i, guess); } // Replaces "_" with correct letter.
                     }
 
                     if (!wordState.contains('_')) {  // No remaining "_" -> player wins!
@@ -141,9 +135,7 @@ public class Hangman {
                     wrongGuesses++; // Wrong guess -> incremented variable.
                     System.out.println("(Wrong guess!)\n");
 
-                    if (wrongGuesses < MAX_WRONG_GUESSES) {
-                        System.out.println(getHangmanArt(wrongGuesses));
-                    }
+                    if (wrongGuesses < MAX_WRONG_GUESSES) { System.out.println(getHangmanArt(wrongGuesses)); }
                 }
             }
 

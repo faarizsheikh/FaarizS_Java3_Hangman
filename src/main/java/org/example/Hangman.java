@@ -7,7 +7,7 @@ import java.util.*;
     Program: Computer Programming (T850),
     Professor: Câi Filiault,
     Created: January 14, 2026,
-    Last Updated: January 14, 2026
+    Last Updated: January 15, 2026
  */
 
 /* SOURCES:
@@ -22,8 +22,9 @@ import java.util.*;
     - Baeldung (Website): Immutable set.
         (https://www.baeldung.com/java-immutable-set) -
  */
-
 public class Hangman {
+
+    /* === CONSTANTS === */
 
     private static final int MAX_WRONG_GUESSES = 6;
 
@@ -37,20 +38,48 @@ public class Hangman {
             "sql", "technology", "typescript", "xml"
     };
 
+    private static final String[] GAME_OVER_MESSAGES = {
+            "(Not quite. The word remains undefeated.)",
+            "(The code wins this round.)",
+            "(Try again. Victory favors the persistent.)"
+    };
+
     private static final Set<String> YES_RESPONSES = Set.of(
             "yes", "yea", "yeh", "yah", "ye", "ya", "yup", "yep", "y"
     ); // Fixed that's why I used immutable set.
 
+    /* === MAIN === */
+
     public static void main(String[] args) {
+
         Scanner scanner = new Scanner(System.in);
         Random rand = new Random();
         boolean playAgain = true;
 
         while (playAgain) {
+
             String word = getRandomWord(rand);
             int wrongGuesses = 0;
 
             ArrayList<Character> wordState = new ArrayList<>();
+            Set<Character> guessedLetters = new HashSet<>();
+
+            String victoryMessage = """
+            The word was indeed "%s".
+            Hang in there, buddy. Help is on the way!
+            ...
+            """.formatted(word);
+
+            String freed = """
+                           |___
+                           |   |
+                           |
+                           |
+                           |     O
+                           |   / | \\
+                           |     |
+                         __|__ /   \\
+                         """;
 
             for (int i = 0; i < word.length(); i++) { // Fills wordState with underscores (_) based on word length.
                 wordState.add('_');
@@ -62,55 +91,84 @@ public class Hangman {
 
             // MAIN LOOP:
             while (wrongGuesses < MAX_WRONG_GUESSES) {
-                System.out.println(getHangmanArt(wrongGuesses)); // Hangman art shown based on guesses.
-
                 System.out.print("Word: ");
                 for (char c : wordState) {
-                    System.out.print(c); // Prints each blank or char without spaces.
+                    System.out.print(c + " "); // Prints each blank or char without spaces.
+                }
+                System.out.println();
+
+                if (!guessedLetters.isEmpty()) {
+                    System.out.print("Guessed letters: ");
+                    List<Character> sorted = new ArrayList<>(guessedLetters);
+                    Collections.sort(sorted);
+                    for (char c : sorted) {
+                        System.out.print(c + " "); // Displays guessed letters.
+                    }
+                    System.out.println();
                 }
 
-                // INPUT:
-                System.out.print("\nGuess a letter: ");
-                char guess = scanner.next().toLowerCase().charAt(0); // Takes first character, convert to lowercase.
+                // GET: Input
+                System.out.print("Guess a letter: ");
+                char guess = scanner.next().trim().toLowerCase().charAt(0); // Takes first character, convert to lowercase.
 
-                // CHECK GUESS:
+                if (!Character.isLetter(guess)) { // Validates input and only allow letters of the English alphabet.
+                    System.out.println("(Please enter a letter A-Z only!)\n");
+                    continue;
+                }
+
+                if (guessedLetters.contains(guess)) { // Validates input and doesn't count repeated guesses.
+                    System.out.println("(You already guessed that letter!)\n");
+                    continue;
+                }
+                guessedLetters.add(guess);
+
+                // CHECKS: Guess, to see if correct or incorrect
                 if (word.indexOf(guess) >= 0) {
                     System.out.println("(Correct guess!)\n");
 
                     for (int i = 0; i < word.length(); i++) {
                         if (word.charAt(i) == guess) {
-                            wordState.set(i, guess); // Replaces _ with correct letter.
+                            wordState.set(i, guess); // Replaces "_" with correct letter.
                         }
                     }
 
-                    if (!wordState.contains('_')) { // No remaining underscores -> player wins!
-                        System.out.printf("YOU WON!%n%n%s%nThe word was \"%s\".", getHangmanArt(wrongGuesses), word);
+                    if (!wordState.contains('_')) {  // No remaining "_" -> player wins!
+                        System.out.printf("%nYOU WON!%n%s%n%s%nThere.", victoryMessage, freed);
                         break;
                     }
+
                 } else {
                     wrongGuesses++; // Wrong guess -> incremented variable.
                     System.out.println("(Wrong guess!)\n");
+
+                    if (wrongGuesses < MAX_WRONG_GUESSES) {
+                        System.out.println(getHangmanArt(wrongGuesses));
+                    }
                 }
             }
 
+            // END: Round
             if (wrongGuesses >= MAX_WRONG_GUESSES) { // Player runs out of guesses -> player loses!
                 System.out.printf("%nGAME OVER!%n%n%s%nThe word was \"%s\".", getHangmanArt(wrongGuesses), word);
+                System.out.println(GAME_OVER_MESSAGES[rand.nextInt(GAME_OVER_MESSAGES.length)]);
             }
 
             // ASK: Replay
-            System.out.print("\nDo you want to guess another word? - (Y)es / (N)o: ");
+            System.out.print("\nDo you want to guess another word? (Y/N): ");
             String response = scanner.next().trim().toLowerCase();
             playAgain = YES_RESPONSES.contains(response);
         }
+
         scanner.close();
     }
 
-    // METHODS:
+    /* === METHODS === */
+
     private static String getRandomWord(Random rand) {
         return WORDS[rand.nextInt(WORDS.length)];
     }
 
-    private static String getHangmanArt(int wrongGuesses) {
+    static String getHangmanArt(int wrongGuesses) {
         return switch (wrongGuesses) {
             case 0 -> "\n\n\n";
             case 1 -> """

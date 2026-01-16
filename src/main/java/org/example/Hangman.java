@@ -58,6 +58,7 @@ public class Hangman {
 
         while (playAgain) {
 
+            int topicChoice = showMenu(scanner);
             String word = getRandomWord(rand);
             int wrongGuesses = 0;
 
@@ -127,7 +128,8 @@ public class Hangman {
                     }
 
                     if (!wordState.contains('_')) {  // No remaining "_" -> player wins!
-                        System.out.printf("%nYOU WON!%n%s%n%s%nThere.", victoryMessage, freed);
+                        System.out.printf("%nYOU WON!%n%s%n%s%nThere.",
+                                victoryMessage, freed);
                         break;
                     }
 
@@ -141,7 +143,8 @@ public class Hangman {
 
             // END: Round
             if (wrongGuesses >= MAX_WRONG_GUESSES) { // Player runs out of guesses -> player loses!
-                System.out.printf("%nGAME OVER!%n%n%s%nThe word was \"%s\".", getHangmanArt(wrongGuesses), word);
+                System.out.printf("%nGAME OVER!%n%n%s%nThe word was \"%s\".",
+                        getHangmanArt(wrongGuesses), word);
                 System.out.println(GAME_OVER_MESSAGES[rand.nextInt(GAME_OVER_MESSAGES.length)]);
             }
 
@@ -150,7 +153,6 @@ public class Hangman {
             String response = scanner.next().trim().toLowerCase();
             playAgain = YES_RESPONSES.contains(response);
         }
-
         scanner.close();
     }
 
@@ -158,6 +160,22 @@ public class Hangman {
 
     private static String getRandomWord(Random rand) {
         return WORDS[rand.nextInt(WORDS.length)];
+    }
+
+    private static int showMenu(Scanner scanner) {
+
+        System.out.println("\nSelect Topic:");
+        System.out.println("1 - Technology");
+        System.out.println("2 - Animals");
+        System.out.println("3 - Food");
+        System.out.print("Choice: ");
+
+        while (!scanner.hasNextInt()) {
+            scanner.next();
+            System.out.print("Enter 1-3: ");
+        }
+
+        return scanner.nextInt();
     }
 
     static String getHangmanArt(int wrongGuesses) {

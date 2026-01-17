@@ -22,10 +22,10 @@ import java.util.*;
     - Baeldung (Website): Immutable set.
         (https://www.baeldung.com/java-immutable-set) -
  */
+
 public class Hangman {
 
     /* === CONSTANTS === */
-
     private static final int MAX_WRONG_GUESSES = 6;
 
     private static final String[] TECH_WORDS = {
@@ -48,10 +48,9 @@ public class Hangman {
 
     private static final Set<String> YES_RESPONSES = Set.of(
             "yes", "yea", "yeh", "yah", "ye", "ya", "yup", "yep", "y"
-    ); // Fixed that's why I used immutable set.
+    ); // Fixed set that's why I used immutable.
 
     /* === MAIN === */
-
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
@@ -96,7 +95,7 @@ public class Hangman {
                          __|__ /   \\
                          """;
 
-            for (int i = 0; i < word.length(); i++) { wordState.add('_'); }  // Fills wordState with _ per word length.
+            for (int i = 0; i < word.length(); i++) { wordState.add('_'); } // Fills wordState with _ per word length.
 
             // MAIN LOOP:
             while (wrongGuesses < MAX_WRONG_GUESSES) {
@@ -136,7 +135,7 @@ public class Hangman {
                     }
 
                     // End Round: Victory!
-                    if (!wordState.contains('_')) {  // No remaining "_" -> player wins!
+                    if (!wordState.contains('_')) { // No remaining "_" -> player wins!
                         System.out.printf("%n%s%n%s%n",
                                 victoryMessage, freed);
                         break;
@@ -165,7 +164,6 @@ public class Hangman {
     }
 
     /* === METHODS === */
-
     private static int showMenu(Scanner scanner) {
         int choice;
 

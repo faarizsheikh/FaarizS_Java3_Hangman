@@ -28,20 +28,22 @@ public class Hangman {
 
     private static final int MAX_WRONG_GUESSES = 6;
 
-    private static final String[] WORDS = {
-            "angular", "boolean", "bug", "class", "coding",
-            "computer", "conditions", "css", "cybersecurity", "developer",
-            "error", "glitch", "gradle", "html", "internet",
-            "java", "javascript", "javafx", "jquery", "json",
-            "kotlin", "looping", "maven", "networking", "node",
-            "object", "php", "program", "python", "ruby",
-            "sql", "technology", "typescript", "xml"
+    private static final String[] TECH_WORDS = {
+            "computer", "developer", "html", "internet", "java", "networking", "python", "json"
+    };
+
+    private static final String[] ANIMALS = {
+            "cat", "dog", "eagle", "horse", "lion", "pig", "rabbit", "zebra"
+    };
+
+    private static final String[] FOOD = {
+            "biryani", "karahi", "kebab", "pierogies", "poutine", "roast", "spaghetti", "spinach"
     };
 
     private static final String[] GAME_OVER_MESSAGES = {
-            "(Not quite. The word remains undefeated.)",
-            "(The code wins this round.)",
-            "(Try again. Victory favors the persistent.)"
+            "Not quite. The word remains undefeated.",
+            "The code wins this round.",
+            "Try again. Victory favors the persistent."
     };
 
     private static final Set<String> YES_RESPONSES = Set.of(
@@ -56,16 +58,28 @@ public class Hangman {
         Random rand = new Random();
         boolean playAgain = true;
 
+        // WELCOME:
+        String border = "\t\t\t\t\t******************************";
+        System.out.printf("%n%s%n\t\t\t\t\t Welcome to Java Hangman! :D%n%s%n", border, border);
+
         while (playAgain) {
-
             int topicChoice = showMenu(scanner);
-            String word = getRandomWord(rand);
-            int wrongGuesses = 0;
 
+            String word;
+            switch (topicChoice) {
+                case 1 -> word = TECH_WORDS[rand.nextInt(TECH_WORDS.length)];
+                case 2 -> word = ANIMALS[rand.nextInt(ANIMALS.length)];
+                case 3 -> word = FOOD[rand.nextInt(FOOD.length)];
+                default -> word = "";
+            }
+            System.out.println();
+
+            int wrongGuesses = 0;
             ArrayList<Character> wordState = new ArrayList<>();
             Set<Character> guessedLetters = new HashSet<>();
 
             String victoryMessage = """
+            Nice!
             The word was indeed "%s".
             Hang in there, buddy. Help is on the way!
             ...
@@ -73,7 +87,7 @@ public class Hangman {
 
             String freed = """
                            |___
-                           |   |
+                           |   \\
                            |
                            |
                            |     O
@@ -82,13 +96,7 @@ public class Hangman {
                          __|__ /   \\
                          """;
 
-            for (int i = 0; i < word.length(); i++) { // Fills wordState with underscores (_) based on word length.
-                wordState.add('_');
-            }
-
-            // WELCOME:
-            String border = "\t\t\t\t\t******************************";
-            System.out.printf("%n%s%n\t\t\t\t\t Welcome to Java Hangman! :D%n%s%n", border, border);
+            for (int i = 0; i < word.length(); i++) { wordState.add('_'); }  // Fills wordState with _ per word length.
 
             // MAIN LOOP:
             while (wrongGuesses < MAX_WRONG_GUESSES) {
@@ -127,12 +135,12 @@ public class Hangman {
                         if (word.charAt(i) == guess) { wordState.set(i, guess); } // Replaces "_" with correct letter.
                     }
 
+                    // End Round: Victory!
                     if (!wordState.contains('_')) {  // No remaining "_" -> player wins!
-                        System.out.printf("%nYOU WON!%n%s%n%s%nThere.",
+                        System.out.printf("%n%s%n%s%n",
                                 victoryMessage, freed);
                         break;
                     }
-
                 } else {
                     wrongGuesses++; // Wrong guess -> incremented variable.
                     System.out.println("(Wrong guess!)\n");
@@ -141,11 +149,11 @@ public class Hangman {
                 }
             }
 
-            // END: Round
-            if (wrongGuesses >= MAX_WRONG_GUESSES) { // Player runs out of guesses -> player loses!
-                System.out.printf("%nGAME OVER!%n%n%s%nThe word was \"%s\".",
-                        getHangmanArt(wrongGuesses), word);
+            // End Round: Defeat!
+            if (wrongGuesses == MAX_WRONG_GUESSES) { // Player runs out of guesses -> player loses!
                 System.out.println(GAME_OVER_MESSAGES[rand.nextInt(GAME_OVER_MESSAGES.length)]);
+                System.out.printf("%n%s%nThe word was \"%s\".",
+                        getHangmanArt(wrongGuesses), word);
             }
 
             // ASK: Replay
@@ -158,29 +166,31 @@ public class Hangman {
 
     /* === METHODS === */
 
-    private static String getRandomWord(Random rand) {
-        return WORDS[rand.nextInt(WORDS.length)];
-    }
-
     private static int showMenu(Scanner scanner) {
+        int choice;
 
-        System.out.println("\nSelect Topic:");
-        System.out.println("1 - Technology");
-        System.out.println("2 - Animals");
-        System.out.println("3 - Food");
-        System.out.print("Choice: ");
+        while (true) {
+            System.out.println("\nSelect Topic:\n1 - Technology\n2- Animals\n3- Food");
+            System.out.print("Choice: ");
 
-        while (!scanner.hasNextInt()) {
-            scanner.next();
-            System.out.print("Enter 1-3: ");
+            if (scanner.hasNextInt()) {
+
+                choice = scanner.nextInt();
+                if (choice >= 1 && choice <= 3) break;
+
+            } else {
+                scanner.next();
+            }
+            System.out.println("Invalid input. Please enter 1, 2, or 3.");
         }
-
-        return scanner.nextInt();
+        return choice;
     }
 
-    static String getHangmanArt(int wrongGuesses) {
+    static String getHangmanArt(int wrongGuesses) { // Hangman ASCII art learned from @brocodez YT channel.
         return switch (wrongGuesses) {
+
             case 0 -> "\n\n\n";
+
             case 1 -> """
                        |___
                        |   |
@@ -241,6 +251,7 @@ public class Hangman {
                        |
                      __|__
                      """;
+
             default -> "";
         };
     }

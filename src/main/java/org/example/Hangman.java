@@ -1,4 +1,5 @@
 package org.example;
+
 import java.util.*;
 
 /*
@@ -10,17 +11,19 @@ import java.util.*;
     Last Updated: January 15, 2026
  */
 
-/* SOURCES:
+/* Sources I used:
     - Bro code (@brocodez):
         (https://www.youtube.com/watch?v=xk4_1vDrzzo) - Recalling Java basics.
         (https://www.youtube.com/watch?v=0Nn8PZrWZKE) - Hangman + ASCII art for hangman.
-    - W3Schools (Website): Arrays/ArrayList, String methods in Java.
-        (https://www.w3schools.com/java/java_arrays.asp)
-        (https://www.w3schools.com/java/java_arraylist.asp)
-        (https://www.w3schools.com/java/java_set.asp)
-        (https://www.w3schools.com/java/java_ref_string.asp)
-    - Baeldung (Website): Immutable set.
-        (https://www.baeldung.com/java-immutable-set) -
+
+    - W3Schools (Website):
+        (https://www.w3schools.com/java/java_arrays.asp) - Java Arrays.
+        (https://www.w3schools.com/java/java_arraylist.asp) - Java ArrayLists.
+        (https://www.w3schools.com/java/java_set.asp) - Sets in Java.
+        (https://www.w3schools.com/java/java_ref_string.asp) - String Methods in Java.
+
+    - Baeldung (Website):
+        (https://www.baeldung.com/java-immutable-set) - Immutable Sets in Java.
  */
 
 public class Hangman {
@@ -28,16 +31,16 @@ public class Hangman {
     /* === CONSTANTS === */
     private static final int MAX_WRONG_GUESSES = 6;
 
-    private static final String[] TECH_WORDS = {
-            "computer", "developer", "html", "internet", "java", "networking", "python", "json"
-    };
-
     private static final String[] ANIMALS = {
             "cat", "dog", "eagle", "horse", "lion", "pig", "rabbit", "zebra"
     };
 
     private static final String[] FOOD = {
             "biryani", "karahi", "kebab", "pierogies", "poutine", "roast", "spaghetti", "spinach"
+    };
+
+    private static final String[] TECH_WORDS = {
+            "computer", "developer", "html", "internet", "java", "json", "networking", "python"
     };
 
     private static final String[] GAME_OVER_MESSAGES = {
@@ -66,9 +69,9 @@ public class Hangman {
 
             String word;
             switch (topicChoice) {
-                case 1 -> word = TECH_WORDS[rand.nextInt(TECH_WORDS.length)];
-                case 2 -> word = ANIMALS[rand.nextInt(ANIMALS.length)];
-                case 3 -> word = FOOD[rand.nextInt(FOOD.length)];
+                case 1 -> word = ANIMALS[rand.nextInt(ANIMALS.length)];
+                case 2 -> word = FOOD[rand.nextInt(FOOD.length)];
+                case 3 -> word = TECH_WORDS[rand.nextInt(TECH_WORDS.length)];
                 default -> word = "";
             }
             System.out.println();
@@ -77,38 +80,45 @@ public class Hangman {
             ArrayList<Character> wordState = new ArrayList<>();
             Set<Character> guessedLetters = new HashSet<>();
 
-            String victoryMessage = """
-            Nice!
-            The word was indeed "%s".
-            Hang in there, buddy. Help is on the way!
-            ...
-            """.formatted(word);
-
             String freed = """
-                           |___
-                           |   \\
-                           |
-                           |
-                           |     O
-                           |   / | \\
-                           |     |
-                         __|__ /   \\
-                         """;
+                      |___
+                      |   \\
+                      |
+                      |
+                      |     O
+                      |   / | \\
+                      |     |
+                    __|__ /   \\
+                    """;
 
-            for (int i = 0; i < word.length(); i++) { wordState.add('_'); } // Fills wordState with _ per word length.
+            String victoryMessage = """
+                    Nice!
+                    Hang in there, buddy. Help is on the way!...
+                    """;
+
+            for (int i = 0; i < word.length(); i++) {
+                wordState.add('_');
+            } // Fills wordState with _ per word length.
 
             // MAIN LOOP:
             while (wrongGuesses < MAX_WRONG_GUESSES) {
                 System.out.print("Word: ");
-                for (char c : wordState) { System.out.print(c + " "); } // Prints each blank or char without spaces.
+
+                for (char c : wordState) {
+                    System.out.print(c + " ");
+                } // Prints each blank or char without spaces.
                 System.out.println();
 
                 if (!guessedLetters.isEmpty()) {
                     System.out.print("Guessed letters: ");
+
                     List<Character> sorted = new ArrayList<>(guessedLetters);
                     Collections.sort(sorted);
-                    for (char c : sorted) { System.out.print(c + " "); } // Displays guessed letters.
-                    System.out.println();
+
+                    for (char c : sorted) {
+                        System.out.print(c + " ");
+                    } // Displays guessed letters.
+                    System.out.print("\n\n");
                 }
 
                 // GET: Input
@@ -131,20 +141,27 @@ public class Hangman {
                     System.out.println("(Correct guess!)\n");
 
                     for (int i = 0; i < word.length(); i++) {
-                        if (word.charAt(i) == guess) { wordState.set(i, guess); } // Replaces "_" with correct letter.
+                        if (word.charAt(i) == guess) {
+                            wordState.set(i, guess);
+                        } // Replaces "_" with correct letter.
                     }
 
                     // End Round: Victory!
                     if (!wordState.contains('_')) { // No remaining "_" -> player wins!
-                        System.out.printf("%n%s%n%s%n",
-                                victoryMessage, freed);
+                        System.out.printf("%s%n%s%nThe word was indeed \"%s\".",
+                                victoryMessage,
+                                freed,
+                                word);
                         break;
                     }
+
                 } else {
                     wrongGuesses++; // Wrong guess -> incremented variable.
                     System.out.println("(Wrong guess!)\n");
 
-                    if (wrongGuesses < MAX_WRONG_GUESSES) { System.out.println(getHangmanArt(wrongGuesses)); }
+                    if (wrongGuesses < MAX_WRONG_GUESSES) {
+                        System.out.println(getHangmanArt(wrongGuesses));
+                    }
                 }
             }
 
@@ -168,7 +185,7 @@ public class Hangman {
         int choice;
 
         while (true) {
-            System.out.println("\nSelect Topic:\n1 - Technology\n2- Animals\n3- Food");
+            System.out.println("\nSelect Topic:\n1- Animals\n2- Food\n3- Technology");
             System.out.print("Choice: ");
 
             if (scanner.hasNextInt()) {
@@ -190,65 +207,70 @@ public class Hangman {
             case 0 -> "\n\n\n";
 
             case 1 -> """
-                       |___
-                       |   |
-                       |   O
-                       |
-                       |
-                       |
-                       |
-                     __|__
-                     """;
+                      |___
+                      |   |
+                      |   O
+                      |
+                      |
+                      |
+                      |
+                    __|__
+                    """;
+
             case 2 -> """
-                       |___
-                       |   |
-                       |   O
-                       |   |
-                       |   |
-                       |
-                       |
-                     __|__
-                     """;
+                      |___
+                      |   |
+                      |   O
+                      |   |
+                      |   |
+                      |
+                      |
+                    __|__
+                    """;
+
             case 3 -> """
-                       |___
-                       |   |
-                       |   O
-                       | / |
-                       |   |
-                       |
-                       |
-                     __|__
-                     """;
+                      |___
+                      |   |
+                      |   O
+                      | / |
+                      |   |
+                      |
+                      |
+                    __|__
+                    """;
+
             case 4 -> """
-                       |___
-                       |   |
-                       |   O
-                       | / | \\
-                       |   |
-                       |
-                       |
-                     __|__
-                     """;
+                      |___
+                      |   |
+                      |   O
+                      | / | \\
+                      |   |
+                      |
+                      |
+                    __|__
+                    """;
+
             case 5 -> """
-                       |___
-                       |   |
-                       |   O
-                       | / | \\
-                       |   |
-                       |  /
-                       |
-                     __|__
-                     """;
+                      |___
+                      |   |
+                      |   O
+                      | / | \\
+                      |   |
+                      |  /
+                      |
+                    __|__
+                    """;
+
             case 6 -> """
-                       |___
-                       |   |
-                       |   O
-                       | / | \\
-                       |   |
-                       |  / \\
-                       |
-                     __|__
-                     """;
+                      |___
+                      |   |
+                      |   O
+                      | / | \\
+                      |   |
+                      |  / \\
+                      |
+                    __|__
+                    """;
 
             default -> "";
         };

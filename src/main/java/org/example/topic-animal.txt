@@ -1,0 +1,8 @@
+cat
+dog
+eagle
+horse
+lion
+pig
+rabbit
+zebra

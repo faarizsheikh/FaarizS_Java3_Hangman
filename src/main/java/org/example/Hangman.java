@@ -1,6 +1,7 @@
 package org.example;
 
 import java.util.*;
+import java.io.*;
 
 /*
     Name: Faariz Haider Sheikh,
@@ -13,7 +14,7 @@ import java.util.*;
 
 /* Sources I used:
     - Bro code (@brocodez):
-        (https://www.youtube.com/watch?v=xk4_1vDrzzo) - Recalling Java basics.
+        (https://www.youtube.com/watch?v=xk4_1vDrzzo) - Recalling Java basics (full video)
         (https://www.youtube.com/watch?v=0Nn8PZrWZKE) - Hangman + ASCII art for hangman.
 
     - W3Schools (Website):
@@ -24,34 +25,13 @@ import java.util.*;
 
     - Baeldung (Website):
         (https://www.baeldung.com/java-immutable-set) - Immutable Sets in Java.
+        (https://www.baeldung.com/java-getresourceasstream-vs-fileinputstream) - getResourceAsStream
  */
 
 public class Hangman {
 
     /* === CONSTANTS === */
     private static final int MAX_WRONG_GUESSES = 6;
-
-    private static final String[] ANIMALS = {
-            "cat", "dog", "eagle", "horse", "lion", "pig", "rabbit", "zebra"
-    };
-
-    private static final String[] FOOD = {
-            "biryani", "karahi", "kebab", "pierogies", "poutine", "roast", "spaghetti", "spinach"
-    };
-
-    private static final String[] TECH_WORDS = {
-            "computer", "developer", "html", "internet", "java", "json", "networking", "python"
-    };
-
-    private static final String[] GAME_OVER_MESSAGES = {
-            "Not quite. The word remains undefeated.",
-            "The code wins this round.",
-            "Try again. Victory favors the persistent."
-    };
-
-    private static final Set<String> YES_RESPONSES = Set.of(
-            "yes", "yea", "yeh", "yah", "ye", "ya", "yup", "yep", "y"
-    ); // Fixed set that's why I used immutable.
 
     /* === MAIN === */
     public static void main(String[] args) {
@@ -67,13 +47,23 @@ public class Hangman {
         while (playAgain) {
             int topicChoice = showMenu(scanner);
 
-            String word;
+            String filePath;
+
             switch (topicChoice) {
-                case 1 -> word = ANIMALS[rand.nextInt(ANIMALS.length)];
-                case 2 -> word = FOOD[rand.nextInt(FOOD.length)];
-                case 3 -> word = TECH_WORDS[rand.nextInt(TECH_WORDS.length)];
-                default -> word = "";
+                case 1 -> filePath = "topic-animal.txt";
+                case 2 -> filePath = "topic-food.txt";
+                case 3 -> filePath = "topic-tech.txt";
+                default -> filePath = "";
             }
+
+            ArrayList<String> words = loadWords(filePath);
+
+            if (words.isEmpty()) {
+                System.out.println("No words found. Exiting game.");
+                return;
+            }
+
+            String word = words.get(rand.nextInt(words.size()));
             System.out.println();
 
             int wrongGuesses = 0;
@@ -96,17 +86,17 @@ public class Hangman {
                     Hang in there, buddy. Help is on the way!...
                     """;
 
-            for (int i = 0; i < word.length(); i++) {
+            for (int i = 0; i < word.length(); i++) { // Fills wordState with _ per word length.
                 wordState.add('_');
-            } // Fills wordState with _ per word length.
+            }
 
             // MAIN LOOP:
             while (wrongGuesses < MAX_WRONG_GUESSES) {
                 System.out.print("Word: ");
 
-                for (char c : wordState) {
+                for (char c : wordState) { // Prints each blank or char without spaces.
                     System.out.print(c + " ");
-                } // Prints each blank or char without spaces.
+                }
                 System.out.println();
 
                 if (!guessedLetters.isEmpty()) {
@@ -115,9 +105,9 @@ public class Hangman {
                     List<Character> sorted = new ArrayList<>(guessedLetters);
                     Collections.sort(sorted);
 
-                    for (char c : sorted) {
+                    for (char c : sorted) { // Displays guessed letters.
                         System.out.print(c + " ");
-                    } // Displays guessed letters.
+                    }
                     System.out.print("\n\n");
                 }
 
@@ -141,9 +131,9 @@ public class Hangman {
                     System.out.println("(Correct guess!)\n");
 
                     for (int i = 0; i < word.length(); i++) {
-                        if (word.charAt(i) == guess) {
+                        if (word.charAt(i) == guess) { // Replaces "_" with correct letter.
                             wordState.set(i, guess);
-                        } // Replaces "_" with correct letter.
+                        }
                     }
 
                     // End Round: Victory!
@@ -181,6 +171,35 @@ public class Hangman {
     }
 
     /* === METHODS === */
+
+    private static final String[] GAME_OVER_MESSAGES = {
+            "Not quite. The word remains undefeated.",
+            "The code wins this round.",
+            "Try again. Victory favors the persistent."
+    };
+
+    private static final Set<String> YES_RESPONSES = Set.of(
+            "y", "ya", "yah", "ye", "yea", "yeah", "yeh", "yep", "yes", "yup"
+    ); // Fixed set that's why I used immutable.
+
+    private static ArrayList<String> loadWords(String resourceName) {
+        ArrayList<String> words = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(Hangman.class.getResourceAsStream("/" + resourceName)))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                if (!line.isBlank()) words.add(line.trim().toLowerCase());
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error loading resource: " + resourceName);
+        }
+        return words;
+    }
+
     private static int showMenu(Scanner scanner) {
         int choice;
 
@@ -189,8 +208,8 @@ public class Hangman {
             System.out.print("Choice: ");
 
             if (scanner.hasNextInt()) {
-
                 choice = scanner.nextInt();
+
                 if (choice >= 1 && choice <= 3) break;
 
             } else {
@@ -201,7 +220,7 @@ public class Hangman {
         return choice;
     }
 
-    static String getHangmanArt(int wrongGuesses) { // Hangman ASCII art learned from @brocodez YT channel.
+    private static String getHangmanArt(int wrongGuesses) { // ASCII Hangman art learned from @brocodez YT channel.
         return switch (wrongGuesses) {
 
             case 0 -> "\n\n\n";

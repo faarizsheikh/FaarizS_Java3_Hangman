@@ -86,33 +86,27 @@ public class Hangman {
                     Hang in there, buddy. Help is on the way!...
                     """;
 
-            for (int i = 0; i < word.length(); i++) { // Fills wordState with _ per word length.
-                wordState.add('_');
-            }
+            for (int i = 0; i < word.length(); i++) wordState.add('_'); // Fills wordState with _ per word length.
 
             // MAIN LOOP:
             while (wrongGuesses < MAX_WRONG_GUESSES) {
                 System.out.print("Word: ");
 
-                for (char c : wordState) { // Prints each blank or char without spaces.
-                    System.out.print(c + " ");
-                }
+                for (char c : wordState) System.out.print(c + " "); // Prints each blank or char without spaces.
                 System.out.println();
 
                 if (!guessedLetters.isEmpty()) {
-                    System.out.print("Guessed letters: ");
+                    System.out.print("Already guessed: ");
 
                     List<Character> sorted = new ArrayList<>(guessedLetters);
                     Collections.sort(sorted);
 
-                    for (char c : sorted) { // Displays guessed letters.
-                        System.out.print(c + " ");
-                    }
+                    for (char c : sorted) System.out.print(c + " "); // Displays guessed letters.
                     System.out.print("\n\n");
                 }
 
                 // GET: Input
-                System.out.print("Guess a letter: ");
+                System.out.print("Enter a letter: ");
                 char guess = scanner.next().trim().toLowerCase().charAt(0); // Takes 1st char, convert -> lowercase.
 
                 if (!Character.isLetter(guess)) { // Validates input and only allow letters of the English alphabet.
@@ -131,9 +125,7 @@ public class Hangman {
                     System.out.println("(Correct guess!)\n");
 
                     for (int i = 0; i < word.length(); i++) {
-                        if (word.charAt(i) == guess) { // Replaces "_" with correct letter.
-                            wordState.set(i, guess);
-                        }
+                        if (word.charAt(i) == guess) wordState.set(i, guess); // Replaces "_" with correct letter.
                     }
 
                     // End Round: Victory!
@@ -149,9 +141,7 @@ public class Hangman {
                     wrongGuesses++; // Wrong guess -> incremented variable.
                     System.out.println("(Wrong guess!)\n");
 
-                    if (wrongGuesses < MAX_WRONG_GUESSES) {
-                        System.out.println(getHangmanArt(wrongGuesses));
-                    }
+                    if (wrongGuesses < MAX_WRONG_GUESSES) System.out.println(getHangmanArt(wrongGuesses));
                 }
             }
 
@@ -185,9 +175,14 @@ public class Hangman {
     private static ArrayList<String> loadWords(String resourceName) {
         ArrayList<String> words = new ArrayList<>();
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(Hangman.class.getResourceAsStream("/" + resourceName)))) {
+        InputStream inputStream = Hangman.class.getResourceAsStream("/" + resourceName);
 
+        if (inputStream == null) {
+            System.out.println("Resource not found: " + resourceName);
+            return words;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
 
             while ((line = reader.readLine()) != null) {

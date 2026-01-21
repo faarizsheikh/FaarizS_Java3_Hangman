@@ -9,23 +9,7 @@ import java.io.*;
     Program: Computer Programming (T850),
     Professor: Câi Filiault,
     Created: January 14, 2026,
-    Last Updated: January 15, 2026
- */
-
-/* Sources I used:
-    - Bro code (@brocodez):
-        (https://www.youtube.com/watch?v=xk4_1vDrzzo) - Recalling Java basics (full video)
-        (https://www.youtube.com/watch?v=0Nn8PZrWZKE) - Hangman + ASCII art for hangman.
-
-    - W3Schools (Website):
-        (https://www.w3schools.com/java/java_arrays.asp) - Java Arrays.
-        (https://www.w3schools.com/java/java_arraylist.asp) - Java ArrayLists.
-        (https://www.w3schools.com/java/java_set.asp) - Sets in Java.
-        (https://www.w3schools.com/java/java_ref_string.asp) - String Methods in Java.
-
-    - Baeldung (Website):
-        (https://www.baeldung.com/java-immutable-set) - Immutable Sets in Java.
-        (https://www.baeldung.com/java-getresourceasstream-vs-fileinputstream) - getResourceAsStream
+    Last Updated: January 21, 2026
  */
 
 public class Hangman {
@@ -45,9 +29,9 @@ public class Hangman {
         System.out.printf("%n%s%n\t\t\t\t\t Welcome to Java Hangman! :D%n%s%n", border, border);
 
         while (playAgain) {
-            int topicChoice = showMenu(scanner);
 
             String filePath;
+            int topicChoice = Menu(scanner);
 
             switch (topicChoice) {
                 case 1 -> filePath = "topic-animal.txt";
@@ -56,7 +40,18 @@ public class Hangman {
                 default -> filePath = "";
             }
 
-            ArrayList<String> words = loadWords(filePath);
+            /*
+             I used Arraylist here because I know the list will change.
+             Generic <string>: only allow strings in the list because reading files is considered dangerous code.
+                - https://www.youtube.com/watch?v=H9vc4gTtGGA&pp=ugUEEgJlbg%3D%3D
+                - https://www.youtube.com/watch?v=jUcAyZ5OUm0
+                - https://www.geeksforgeeks.org/java/generic-class-in-java/
+                - https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics
+
+             ArrayLists are dynamic:
+                - https://www.w3schools.com/java/java_arraylist.asp
+            */
+            ArrayList<String> words = Words(filePath);
 
             if (words.isEmpty()) {
                 System.out.println("No words found. Exiting game.");
@@ -67,8 +62,17 @@ public class Hangman {
             System.out.println();
 
             int wrongGuesses = 0;
+
+            /*
+             I know that we would need to update the wordState by index, so I used ArrayList.
+             Plus, we don't know the exact length of the letter as the game chooses one randomly.
+
+             I used set for haveGuessed because I want to prevent duplicate guesses.
+             Hash set specifically because it helps search faster and because the collection is dynamic:
+                - https://www.baeldung.com/java-set-vs-list
+            */
             ArrayList<Character> wordState = new ArrayList<>();
-            Set<Character> guessedLetters = new HashSet<>();
+            Set<Character> haveGuessed = new HashSet<>();
 
             String freed = """
                       |___
@@ -95,10 +99,10 @@ public class Hangman {
                 for (char c : wordState) System.out.print(c + " "); // Prints each blank or char without spaces.
                 System.out.println();
 
-                if (!guessedLetters.isEmpty()) {
+                if (!haveGuessed.isEmpty()) {
                     System.out.print("Already guessed: ");
 
-                    List<Character> sorted = new ArrayList<>(guessedLetters);
+                    List<Character> sorted = new ArrayList<>(haveGuessed);
                     Collections.sort(sorted);
 
                     for (char c : sorted) System.out.print(c + " "); // Displays guessed letters.
@@ -114,11 +118,11 @@ public class Hangman {
                     continue;
                 }
 
-                if (guessedLetters.contains(guess)) { // Validates input and doesn't count repeated guesses.
+                if (haveGuessed.contains(guess)) { // Validates input and doesn't count repeated guesses.
                     System.out.println("(You already guessed that letter!)\n");
                     continue;
                 }
-                guessedLetters.add(guess);
+                haveGuessed.add(guess);
 
                 // CHECKS: Guess, to see if correct or incorrect
                 if (word.indexOf(guess) >= 0) {
@@ -141,15 +145,14 @@ public class Hangman {
                     wrongGuesses++; // Wrong guess -> incremented variable.
                     System.out.println("(Wrong guess!)\n");
 
-                    if (wrongGuesses < MAX_WRONG_GUESSES) System.out.println(getHangmanArt(wrongGuesses));
+                    if (wrongGuesses < MAX_WRONG_GUESSES) System.out.println(Art(wrongGuesses));
                 }
             }
 
             // End Round: Defeat!
             if (wrongGuesses == MAX_WRONG_GUESSES) { // Player runs out of guesses -> player loses!
-                System.out.println(GAME_OVER_MESSAGES[rand.nextInt(GAME_OVER_MESSAGES.length)]);
-                System.out.printf("%n%s%nThe word was \"%s\".",
-                        getHangmanArt(wrongGuesses), word);
+                System.out.printf("%nGame over!%n%n%s%nThe word was \"%s\".",
+                        Art(wrongGuesses), word);
             }
 
             // ASK: Replay
@@ -162,19 +165,33 @@ public class Hangman {
 
     /* === METHODS === */
 
-    private static final String[] GAME_OVER_MESSAGES = {
-            "Not quite. The word remains undefeated.",
-            "The code wins this round.",
-            "Try again. Victory favors the persistent."
-    };
+    /*
+     I used immutable.setOf() because:
+        - fixed
+        - fast look-up
+        - order irrelevant
 
+        https://www.baeldung.com/java-immutable-set
+        https://docs.oracle.com/en/java/javase/17/core/creating-immutable-lists-sets-and-maps.html
+     */
     private static final Set<String> YES_RESPONSES = Set.of(
             "y", "ya", "yah", "ye", "yea", "yeah", "yeh", "yep", "yes", "yup"
-    ); // Fixed set that's why I used immutable.
+    );
 
-    private static ArrayList<String> loadWords(String resourceName) {
+    /*
+      I used generic class ArrayList with a specific type parameter <String>.
+      Because we only want strings in the list after we store them:
+        - https://www.youtube.com/watch?v=H9vc4gTtGGA&pp=ugUEEgJlbg%3D%3D
+        - https://www.youtube.com/watch?v=jUcAyZ5OUm0
+        - https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics
+    */
+    private static ArrayList<String> Words(String resourceName) {
         ArrayList<String> words = new ArrayList<>();
 
+        /*
+         I remember learning how to use getResourceAsStream in Java 1 class taught by Mathew Haug.
+            - https://www.baeldung.com/java-getresourceasstream-vs-fileinputstream
+        */
         InputStream inputStream = Hangman.class.getResourceAsStream("/" + resourceName);
 
         if (inputStream == null) {
@@ -195,7 +212,7 @@ public class Hangman {
         return words;
     }
 
-    private static int showMenu(Scanner scanner) {
+    private static int Menu(Scanner scanner) {
         int choice;
 
         while (true) {
@@ -215,7 +232,7 @@ public class Hangman {
         return choice;
     }
 
-    private static String getHangmanArt(int wrongGuesses) { // ASCII Hangman art learned from @brocodez YT channel.
+    private static String Art(int wrongGuesses) {
         return switch (wrongGuesses) {
 
             case 0 -> "\n\n\n";

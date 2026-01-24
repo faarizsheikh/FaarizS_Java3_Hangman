@@ -9,7 +9,7 @@ import java.io.*;
     Program: Computer Programming (T850),
     Professor: Câi Filiault,
     Created: January 14, 2026,
-    Last Updated: January 21, 2026
+    Last Updated: January 24, 2026
  */
 
 public class Hangman {
@@ -31,7 +31,22 @@ public class Hangman {
         while (playAgain) {
 
             String filePath;
-            int topicChoice = Menu(scanner);
+            int topicChoice;
+
+            while (true) {
+                System.out.print("\nSelect Topic:\n1- Animals\n2- Food\n3- Technology\nChoice: ");
+
+                if (scanner.hasNextInt()) {
+                    topicChoice = scanner.nextInt();
+
+                    if (topicChoice >= 1 && topicChoice <= 3) break;
+
+                } else {
+                    scanner.next(); // Discard invalid input
+                }
+
+                System.out.println("Invalid input. Please enter 1, 2, or 3.");
+            }
 
             switch (topicChoice) {
                 case 1 -> filePath = "topic-animal.txt";
@@ -41,15 +56,8 @@ public class Hangman {
             }
 
             /*
-             I used Arraylist here because I know the list will change.
+             I used Arraylist here because I know the list will change (dynamic).
              Generic <string>: only allow strings in the list because reading files is considered dangerous code.
-                - https://www.youtube.com/watch?v=H9vc4gTtGGA&pp=ugUEEgJlbg%3D%3D
-                - https://www.youtube.com/watch?v=jUcAyZ5OUm0
-                - https://www.geeksforgeeks.org/java/generic-class-in-java/
-                - https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics
-
-             ArrayLists are dynamic:
-                - https://www.w3schools.com/java/java_arraylist.asp
             */
             ArrayList<String> words = Words(filePath);
 
@@ -69,7 +77,6 @@ public class Hangman {
 
              I used set for haveGuessed because I want to prevent duplicate guesses.
              Hash set specifically because it helps search faster and because the collection is dynamic:
-                - https://www.baeldung.com/java-set-vs-list
             */
             ArrayList<Character> wordState = new ArrayList<>();
             Set<Character> haveGuessed = new HashSet<>();
@@ -158,33 +165,13 @@ public class Hangman {
             // ASK: Replay
             System.out.print("\nDo you want to guess another word? (Y/N): ");
             String response = scanner.next().trim().toLowerCase();
-            playAgain = YES_RESPONSES.contains(response);
+            playAgain = !response.isEmpty() && response.charAt(0) == 'y';
+            scanner.nextLine();
         }
         scanner.close();
     }
 
     /* === METHODS === */
-
-    /*
-     I used immutable.setOf() because:
-        - fixed
-        - fast look-up
-        - order irrelevant
-
-        https://www.baeldung.com/java-immutable-set
-        https://docs.oracle.com/en/java/javase/17/core/creating-immutable-lists-sets-and-maps.html
-     */
-    private static final Set<String> YES_RESPONSES = Set.of(
-            "y", "ya", "yah", "ye", "yea", "yeah", "yeh", "yep", "yes", "yup"
-    );
-
-    /*
-      I used generic class ArrayList with a specific type parameter <String>.
-      Because we only want strings in the list after we store them:
-        - https://www.youtube.com/watch?v=H9vc4gTtGGA&pp=ugUEEgJlbg%3D%3D
-        - https://www.youtube.com/watch?v=jUcAyZ5OUm0
-        - https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics
-    */
     private static ArrayList<String> Words(String resourceName) {
         ArrayList<String> words = new ArrayList<>();
 
@@ -210,26 +197,6 @@ public class Hangman {
             System.out.println("Error loading resource: " + resourceName);
         }
         return words;
-    }
-
-    private static int Menu(Scanner scanner) {
-        int choice;
-
-        while (true) {
-            System.out.println("\nSelect Topic:\n1- Animals\n2- Food\n3- Technology");
-            System.out.print("Choice: ");
-
-            if (scanner.hasNextInt()) {
-                choice = scanner.nextInt();
-
-                if (choice >= 1 && choice <= 3) break;
-
-            } else {
-                scanner.next();
-            }
-            System.out.println("Invalid input. Please enter 1, 2, or 3.");
-        }
-        return choice;
     }
 
     private static String Art(int wrongGuesses) {

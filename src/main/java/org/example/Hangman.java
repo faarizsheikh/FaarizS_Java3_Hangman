@@ -39,65 +39,66 @@ public class Hangman {
                 if (scanner.hasNextInt()) {
                     topicChoice = scanner.nextInt();
 
-                    if (topicChoice >= 1 && topicChoice <= 3) break;
-
+                    if (topicChoice >= 1 && topicChoice <= 3)
+                        break;
                 } else {
-                    scanner.next(); // Discard invalid input
+                    scanner.next(); // Discards invalid input
                 }
 
                 System.out.println("Invalid input. Please enter 1, 2, or 3.");
             }
 
             switch (topicChoice) {
-                case 1 -> filePath = "topic-animal.txt";
-                case 2 -> filePath = "topic-food.txt";
-                case 3 -> filePath = "topic-tech.txt";
-                default -> filePath = "";
+            case 1 -> filePath = "topic-animal.txt";
+            case 2 -> filePath = "topic-food.txt";
+            case 3 -> filePath = "topic-tech.txt";
+            default -> filePath = "";
             }
 
-            /*
-             I used Arraylist here because I know the list will change (dynamic).
-             Generic <string>: only allow strings in the list because reading files is considered dangerous code.
-            */
-            ArrayList<String> words = Words(filePath);
+            ArrayList<String> words = new ArrayList<>();
+            InputStream inputStream = Hangman.class.getResourceAsStream("/" + filePath);
+
+            if (inputStream == null) {
+                System.out.println("Resource not found: " + filePath);
+                return;
+            }
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    if (!line.isBlank())
+                        words.add(line.trim().toLowerCase());
+                }
+            } catch (Exception e) {
+                System.out.println("Error loading resource: " + filePath);
+            }
 
             if (words.isEmpty()) {
                 System.out.println("No words found. Exiting game.");
                 return;
             }
-
             String word = words.get(rand.nextInt(words.size()));
             System.out.println();
 
             int wrongGuesses = 0;
-
-            /*
-             I know that we would need to update the wordState by index, so I used ArrayList.
-             Plus, we don't know the exact length of the letter as the game chooses one randomly.
-
-             I used set for haveGuessed because I want to prevent duplicate guesses.
-             Hash set specifically because it helps search faster and because the collection is dynamic:
-            */
             ArrayList<Character> wordState = new ArrayList<>();
             Set<Character> haveGuessed = new HashSet<>();
 
             String freed = """
-                      |___
-                      |   \\
-                      |
-                      |
-                      |     O
-                      |   / | \\
-                      |     |
-                    __|__ /   \\
+                       |_ _ _
+                       |     \\
+                       |
+                       |
+                       |       O
+                       |     / | \\
+                       |       |
+                    _ _|_ _  /   \\
                     """;
 
-            String victoryMessage = """
-                    Nice!
-                    Hang in there, buddy. Help is on the way!...
-                    """;
+            String victoryMessage = "Nice!\nHang in there, buddy. Help is on the way!...";
 
-            for (int i = 0; i < word.length(); i++) wordState.add('_'); // Fills wordState with _ per word length.
+            for (int i = 0; i < word.length(); i++) wordState.add('_'); // Fills it with _ based on word length.
 
             // MAIN LOOP:
             while (wrongGuesses < MAX_WRONG_GUESSES) {
@@ -115,17 +116,16 @@ public class Hangman {
                     for (char c : sorted) System.out.print(c + " "); // Displays guessed letters.
                     System.out.print("\n\n");
                 }
-
                 // GET: Input
                 System.out.print("Enter a letter: ");
-                char guess = scanner.next().trim().toLowerCase().charAt(0); // Takes 1st char, convert -> lowercase.
+                char guess = scanner.next().trim().toLowerCase().charAt(0); // Takes 1st char & convert -> lowercase.
 
-                if (!Character.isLetter(guess)) { // Validates input and only allow letters of the English alphabet.
+                if (!Character.isLetter(guess)) { // Validates input & only allows alphabet.
                     System.out.println("(Please enter a letter A-Z only!)\n");
                     continue;
                 }
 
-                if (haveGuessed.contains(guess)) { // Validates input and doesn't count repeated guesses.
+                if (haveGuessed.contains(guess)) { // Validates input & doesn't count repeated guesses.
                     System.out.println("(You already guessed that letter!)\n");
                     continue;
                 }
@@ -141,15 +141,11 @@ public class Hangman {
 
                     // End Round: Victory!
                     if (!wordState.contains('_')) { // No remaining "_" -> player wins!
-                        System.out.printf("%s%n%s%nThe word was indeed \"%s\".",
-                                victoryMessage,
-                                freed,
-                                word);
+                        System.out.printf("%s%n%n%s%nThe word was indeed \"%s\".", victoryMessage, freed, word);
                         break;
                     }
-
                 } else {
-                    wrongGuesses++; // Wrong guess -> incremented variable.
+                    wrongGuesses++;
                     System.out.println("(Wrong guess!)\n");
 
                     if (wrongGuesses < MAX_WRONG_GUESSES) System.out.println(Art(wrongGuesses));
@@ -158,10 +154,8 @@ public class Hangman {
 
             // End Round: Defeat!
             if (wrongGuesses == MAX_WRONG_GUESSES) { // Player runs out of guesses -> player loses!
-                System.out.printf("%nGame over!%n%n%s%nThe word was \"%s\".",
-                        Art(wrongGuesses), word);
+                System.out.printf("Game over!%n%n%s%nThe word was \"%s\".", Art(wrongGuesses), word);
             }
-
             // ASK: Replay
             System.out.print("\nDo you want to guess another word? (Y/N): ");
             String response = scanner.next().trim().toLowerCase();
@@ -171,106 +165,78 @@ public class Hangman {
         scanner.close();
     }
 
-    /* === METHODS === */
-    private static ArrayList<String> Words(String resourceName) {
-        ArrayList<String> words = new ArrayList<>();
-
-        /*
-         I remember learning how to use getResourceAsStream in Java 1 class taught by Mathew Haug.
-            - https://www.baeldung.com/java-getresourceasstream-vs-fileinputstream
-        */
-        InputStream inputStream = Hangman.class.getResourceAsStream("/" + resourceName);
-
-        if (inputStream == null) {
-            System.out.println("Resource not found: " + resourceName);
-            return words;
-        }
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                if (!line.isBlank()) words.add(line.trim().toLowerCase());
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error loading resource: " + resourceName);
-        }
-        return words;
-    }
-
     private static String Art(int wrongGuesses) {
         return switch (wrongGuesses) {
 
-            case 0 -> "\n\n\n";
+        case 0 -> "\n\n\n";
 
-            case 1 -> """
-                      |___
-                      |   |
-                      |   O
-                      |
-                      |
-                      |
-                      |
-                    __|__
-                    """;
+        case 1 -> """
+                   |_ _ _
+                   |     |
+                   |     O
+                   |
+                   |
+                   |
+                   |
+                _ _|_ _
+                """;
 
-            case 2 -> """
-                      |___
-                      |   |
-                      |   O
-                      |   |
-                      |   |
-                      |
-                      |
-                    __|__
-                    """;
+        case 2 -> """
+                   |_ _ _
+                   |     |
+                   |     O
+                   |     |
+                   |     |
+                   |
+                   |
+                _ _|_ _
+                """;
 
-            case 3 -> """
-                      |___
-                      |   |
-                      |   O
-                      | / |
-                      |   |
-                      |
-                      |
-                    __|__
-                    """;
+        case 3 -> """
+                   |_ _ _
+                   |     |
+                   |     O
+                   |   / |
+                   |     |
+                   |
+                   |
+                _ _|_ _
+                """;
 
-            case 4 -> """
-                      |___
-                      |   |
-                      |   O
-                      | / | \\
-                      |   |
-                      |
-                      |
-                    __|__
-                    """;
+        case 4 -> """
+                   |_ _ _
+                   |     |
+                   |     O
+                   |   / | \\
+                   |     |
+                   |
+                   |
+                _ _|_ _
+                """;
 
-            case 5 -> """
-                      |___
-                      |   |
-                      |   O
-                      | / | \\
-                      |   |
-                      |  /
-                      |
-                    __|__
-                    """;
+        case 5 -> """
+                   |_ _ _
+                   |     |
+                   |     O
+                   |   / | \\
+                   |     |
+                   |   /
+                   |
+                _ _|_ _
+                """;
 
-            case 6 -> """
-                      |___
-                      |   |
-                      |   O
-                      | / | \\
-                      |   |
-                      |  / \\
-                      |
-                    __|__
-                    """;
+        case 6 -> """
+                   |_ _ _
+                   |     |
+                   |     O
+                   |   / | \\
+                   |     |
+                   |   /   \\
+                   |
+                _ _|_ _
+                """;
 
-            default -> "";
+        default -> "";
         };
     }
 }

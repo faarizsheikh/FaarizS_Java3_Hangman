@@ -4,22 +4,19 @@ import java.util.*;
 import java.io.*;
 
 /*
-    Name: Faariz Haider Sheikh,
-    Course: MAD300-26W-001 JAVA PROGRAMMING 3,
+    Student: Faariz Haider Sheikh (0856155),
+    Course: MAD300-26W-001 JAVA PROGRAMMING III,
     Program: Computer Programming (T850),
     Professor: Câi Filiault,
     Created: January 14, 2026,
-    Last Updated: January 24, 2026
+    Last Updated: January 25, 2026
  */
 
 public class Hangman {
-
-    /* === CONSTANTS === */
     private static final int MAX_WRONG_GUESSES = 6;
 
     /* === MAIN === */
     public static void main(String[] args) {
-
         Scanner scanner = new Scanner(System.in);
         Random rand = new Random();
         boolean playAgain = true;
@@ -29,8 +26,7 @@ public class Hangman {
         System.out.printf("%n%s%n\t\t\t\t\t Welcome to Java Hangman! :D%n%s%n", border, border);
 
         while (playAgain) {
-
-            String filePath;
+            String filePath, line;
             int topicChoice;
 
             while (true) {
@@ -42,17 +38,16 @@ public class Hangman {
                     if (topicChoice >= 1 && topicChoice <= 3)
                         break;
                 } else {
-                    scanner.next(); // Discards invalid input
+                    scanner.next(); // Discards invalid input.
                 }
-
                 System.out.println("Invalid input. Please enter 1, 2, or 3.");
             }
 
             switch (topicChoice) {
-            case 1 -> filePath = "topic-animal.txt";
-            case 2 -> filePath = "topic-food.txt";
-            case 3 -> filePath = "topic-tech.txt";
-            default -> filePath = "";
+                case 1 -> filePath = "topic-animal.txt";
+                case 2 -> filePath = "topic-food.txt";
+                case 3 -> filePath = "topic-tech.txt";
+                default -> filePath = "";
             }
 
             ArrayList<String> words = new ArrayList<>();
@@ -64,8 +59,6 @@ public class Hangman {
             }
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                String line;
-
                 while ((line = reader.readLine()) != null) {
                     if (!line.isBlank())
                         words.add(line.trim().toLowerCase());
@@ -83,7 +76,7 @@ public class Hangman {
 
             int wrongGuesses = 0;
             ArrayList<Character> wordState = new ArrayList<>();
-            Set<Character> haveGuessed = new HashSet<>();
+            ArrayList<Character> haveGuessed = new ArrayList<>();
 
             String freed = """
                        |_ _ _
@@ -98,35 +91,38 @@ public class Hangman {
 
             String victoryMessage = "Nice!\nHang in there, buddy. Help is on the way!...";
 
-            for (int i = 0; i < word.length(); i++) wordState.add('_'); // Fills it with _ based on word length.
+            for (int i = 0; i < word.length(); i++)
+                wordState.add('_'); // Fills it with _ based on word length.
 
             // MAIN LOOP:
             while (wrongGuesses < MAX_WRONG_GUESSES) {
                 System.out.print("Word: ");
 
-                for (char c : wordState) System.out.print(c + " "); // Prints each blank or char without spaces.
+                for (char c : wordState)
+                    System.out.print(c + " "); // Prints each blank or char without spaces.
                 System.out.println();
 
                 if (!haveGuessed.isEmpty()) {
-                    System.out.print("Already guessed: ");
+                    System.out.print("[ Guessed: ");
 
-                    List<Character> sorted = new ArrayList<>(haveGuessed);
+                    ArrayList<Character> sorted = new ArrayList<>(haveGuessed); // Keeps the original list.
                     Collections.sort(sorted);
 
-                    for (char c : sorted) System.out.print(c + " "); // Displays guessed letters.
-                    System.out.print("\n\n");
+                    for (char c : sorted)
+                        System.out.print(c + " "); // Displays guessed letters.
+                    System.out.print("]\n\n");
                 }
-                // GET: Input
+
+                // GET & VALIDATE: Input
                 System.out.print("Enter a letter: ");
                 char guess = scanner.next().trim().toLowerCase().charAt(0); // Takes 1st char & convert -> lowercase.
 
-                if (!Character.isLetter(guess)) { // Validates input & only allows alphabet.
+                if (!Character.isLetter(guess)) { // Only allows alphabet.
                     System.out.println("(Please enter a letter A-Z only!)\n");
                     continue;
                 }
-
-                if (haveGuessed.contains(guess)) { // Validates input & doesn't count repeated guesses.
-                    System.out.println("(You already guessed that letter!)\n");
+                if (haveGuessed.contains(guess)) { // Will avoid counting repeated guesses.
+                    System.out.println("(You already tried that.)\n");
                     continue;
                 }
                 haveGuessed.add(guess);
@@ -136,7 +132,8 @@ public class Hangman {
                     System.out.println("(Correct guess!)\n");
 
                     for (int i = 0; i < word.length(); i++) {
-                        if (word.charAt(i) == guess) wordState.set(i, guess); // Replaces "_" with correct letter.
+                        if (word.charAt(i) == guess)
+                            wordState.set(i, guess); // Replaces "_" with correct letter.
                     }
 
                     // End Round: Victory!
@@ -148,7 +145,8 @@ public class Hangman {
                     wrongGuesses++;
                     System.out.println("(Wrong guess!)\n");
 
-                    if (wrongGuesses < MAX_WRONG_GUESSES) System.out.println(Art(wrongGuesses));
+                    if (wrongGuesses < MAX_WRONG_GUESSES)
+                        System.out.println(Art(wrongGuesses));
                 }
             }
 
@@ -168,75 +166,75 @@ public class Hangman {
     private static String Art(int wrongGuesses) {
         return switch (wrongGuesses) {
 
-        case 0 -> "\n\n\n";
+            case 0 -> "\n\n\n";
 
-        case 1 -> """
-                   |_ _ _
-                   |     |
-                   |     O
-                   |
-                   |
-                   |
-                   |
-                _ _|_ _
-                """;
+            case 1 -> """
+                       |_ _ _
+                       |     |
+                       |     O
+                       |
+                       |
+                       |
+                       |
+                    _ _|_ _
+                    """;
 
-        case 2 -> """
-                   |_ _ _
-                   |     |
-                   |     O
-                   |     |
-                   |     |
-                   |
-                   |
-                _ _|_ _
-                """;
+            case 2 -> """
+                       |_ _ _
+                       |     |
+                       |     O
+                       |     |
+                       |     |
+                       |
+                       |
+                    _ _|_ _
+                    """;
 
-        case 3 -> """
-                   |_ _ _
-                   |     |
-                   |     O
-                   |   / |
-                   |     |
-                   |
-                   |
-                _ _|_ _
-                """;
+            case 3 -> """
+                       |_ _ _
+                       |     |
+                       |     O
+                       |   / |
+                       |     |
+                       |
+                       |
+                    _ _|_ _
+                    """;
 
-        case 4 -> """
-                   |_ _ _
-                   |     |
-                   |     O
-                   |   / | \\
-                   |     |
-                   |
-                   |
-                _ _|_ _
-                """;
+            case 4 -> """
+                       |_ _ _
+                       |     |
+                       |     O
+                       |   / | \\
+                       |     |
+                       |
+                       |
+                    _ _|_ _
+                    """;
 
-        case 5 -> """
-                   |_ _ _
-                   |     |
-                   |     O
-                   |   / | \\
-                   |     |
-                   |   /
-                   |
-                _ _|_ _
-                """;
+            case 5 -> """
+                       |_ _ _
+                       |     |
+                       |     O
+                       |   / | \\
+                       |     |
+                       |   /
+                       |
+                    _ _|_ _
+                    """;
 
-        case 6 -> """
-                   |_ _ _
-                   |     |
-                   |     O
-                   |   / | \\
-                   |     |
-                   |   /   \\
-                   |
-                _ _|_ _
-                """;
+            case 6 -> """
+                       |_ _ _
+                       |     |
+                       |     O
+                       |   / | \\
+                       |     |
+                       |   /   \\
+                       |
+                    _ _|_ _
+                    """;
 
-        default -> "";
+            default -> "";
         };
     }
 }

@@ -15,7 +15,6 @@ import java.io.*;
 public class Hangman {
     private static final int MAX_WRONG_GUESSES = 6;
 
-    /* === MAIN === */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Random rand = new Random();
